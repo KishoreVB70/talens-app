@@ -3,27 +3,34 @@ import { useState, useEffect } from "react";
 interface TimerProps {
   initialTime: number;
   timerKey: number;
+  handleSubmit: () => void;
 }
 
-export function Timer({ initialTime, timerKey }: TimerProps) {
+export function Timer({ initialTime, timerKey, handleSubmit }: TimerProps) {
   const [time, setTime] = useState(initialTime);
+  const [isComplete, setIsCompleted] = useState(false);
 
-  // Todo: When timer hits 0, auto submit the answer and proceed to next question
+  // Todo: When timer hits 0, auto submit the answer
   useEffect(() => {
-    setTime(initialTime); // Reset the timer when initialTime changes
+    if (time <= 0) {
+      setIsCompleted(true);
+      return;
+    }
+
     const interval = setInterval(() => {
-      setTime((prevTime) => {
-        if (prevTime > 0) {
-          return prevTime - 1;
-        } else {
-          clearInterval(interval);
-          return 0;
-        }
-      });
+      setTime((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [initialTime, timerKey]); // Add timerKey to dependencies to restart the timer on question change
+  }, [time, timerKey]); // Add timerKey to dependencies to restart the timer on question change
+
+  useEffect(() => {
+    if (isComplete) {
+      handleSubmit();
+      // Prevent further calling of handleSubmit on rerender
+      setIsCompleted(false);
+    }
+  }, [isComplete, handleSubmit]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);

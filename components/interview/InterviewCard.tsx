@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { QuestionDisplay } from "@/components/interview/QuestionDisplay";
 import { Button } from "@/components/ui/button";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
@@ -12,7 +12,7 @@ import useUploadRecordedAudio from "@/hooks/useUploadRecordedAudio";
 type InterviewCardProps = {
   questions: QuizQuestion[];
 };
-// Todo: Can change into enum
+
 export default function InterviewCard({ questions }: InterviewCardProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const currentQuestion = questions[currentQuestionIndex];
@@ -37,7 +37,7 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
     setQuestionState("recording");
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setIsLoading(true);
     stopRecording();
 
@@ -71,12 +71,20 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
       window.location.href = "/summary";
     }
     setIsLoading(false);
-  };
+  }, [
+    addAnswer,
+    audioURL,
+    currentQuestionIndex,
+    questions,
+    stopRecording,
+    uploadRecordedAudio,
+  ]);
 
   return (
     <Card className="max-w-xl w-full p-1.5 ">
-      {/* Header with question number, time limit, and recording status */}
+      {/* Display question number, time limit, progress bar and recording status */}
       <QuestionsHeader
+        handleSubmit={handleSubmit}
         questionIndex={currentQuestionIndex}
         questionsLength={questions.length}
         questionTimeLimit={currentQuestion.timeLimit}
