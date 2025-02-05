@@ -42,22 +42,22 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
     stopRecording();
 
     // 1) Upload audio to supabase db
-    try {
-      await uploadRecordedAudio();
-    } catch (error) {
-      console.error("Failed to upload audio", error);
-      setIsLoading(false);
-      setIsUploadError(true);
-    }
+    // try {
+    //   await uploadRecordedAudio();
+    // } catch (error) {
+    //   console.error("Failed to upload audio", error);
+    //   setIsLoading(false);
+    //   setIsUploadError(true);
+    // }
 
-    // 2) Add answer to context
-    if (!audioURL) return;
-    // Info: Doesn't return an error
-    addAnswer({
-      questionId: questions[currentQuestionIndex].id,
-      audioUrl: audioURL,
-      transcription: null,
-    });
+    // // 2) Add answer to context
+    // if (!audioURL) return;
+    // // Info: Doesn't return an error
+    // addAnswer({
+    //   questionId: questions[currentQuestionIndex].id,
+    //   audioUrl: audioURL,
+    //   transcription: null,
+    // });
 
     // 3) Move to next question or summary page
     if (currentQuestionIndex < questions.length - 1) {

@@ -10,7 +10,6 @@ export function Timer({ initialTime, timerKey, handleSubmit }: TimerProps) {
   const [time, setTime] = useState(initialTime);
   const [isComplete, setIsCompleted] = useState(false);
 
-  // Todo: When timer hits 0, auto submit the answer
   useEffect(() => {
     if (time <= 0) {
       setIsCompleted(true);
@@ -18,12 +17,17 @@ export function Timer({ initialTime, timerKey, handleSubmit }: TimerProps) {
     }
 
     const interval = setInterval(() => {
-      setTime((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+      setTime((prevTime) => prevTime - 1);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [time, timerKey]); // Add timerKey to dependencies to restart the timer on question change
+  }, [time]); // Add timerKey to dependencies to restart the timer on question change
 
+  useEffect(() => {
+    setTime(initialTime);
+  }, [timerKey, initialTime]);
+
+  // use effect to handle submit once timer is complete
   useEffect(() => {
     if (isComplete) {
       handleSubmit();
