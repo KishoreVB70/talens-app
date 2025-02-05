@@ -1,53 +1,14 @@
-import {
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-  MutableRefObject,
-} from "react";
-import { useAnswers } from "@/contexts/AnswersContext";
-import { uploadAudio } from "@/lib/api-utils";
+import { useState, useRef, useCallback, useEffect } from "react";
 
-// Todo: Provide upload control to interview page rather than on stop
-export function useAudioRecorder(questionId: number) {
-  const { interviewId } = useAnswers();
-
+export function useAudioRecorder() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
-  // Todo: Can utilize single state for idle, recording and uploading
   const [isRecording, setIsRecording] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [audioURL, setAudioURL] = useState<string | null>(null);
 
-  const initiateUploadAudio = async (chunksRef: MutableRefObject<Blob[]>) => {
-    console.log("Recording stopped, processing audio...");
-    const audioBlob = new Blob(chunksRef.current, { type: "audio/mp3" });
-
-    // Todo: assess requirement for this url
-    const audioUrl = URL.createObjectURL(audioBlob);
-
-    setIsUploading(true);
-    try {
-      const uploadedUrl = await uploadAudio(
-        audioBlob,
-        questionId,
-        interviewId!
-      );
-      console.log("Audio uploaded successfully:", uploadedUrl);
-      setAudioURL(uploadedUrl);
-    } catch (error) {
-      console.error("Failed to upload audio:", error);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const startRecording = useCallback(async () => {
-    console.log("Starting recording for question:", questionId);
+  const startRecording = async () => {
     try {
       // Clear previous recording data
-      setAudioURL(null);
       chunksRef.current = [];
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -72,7 +33,7 @@ export function useAudioRecorder(questionId: number) {
     } catch (error) {
       console.error("Error in startRecording:", error);
     }
-  }, [questionId]);
+  };
 
   // Stop the MediaRecorder and set isRecording to false
   const stopRecording = useCallback(() => {
@@ -88,14 +49,12 @@ export function useAudioRecorder(questionId: number) {
 
   // Log state changes
   useEffect(() => {
-    console.log("Audio state updated:", { isRecording, audioURL });
-  }, [isRecording, audioURL]);
+    console.log("Audio state updated:", { isRecording });
+  }, [isRecording]);
 
   return {
     isRecording,
-    audioURL,
-    isUploading,
-    transcription: null,
+    chunksRef,
     startRecording,
     stopRecording,
   };

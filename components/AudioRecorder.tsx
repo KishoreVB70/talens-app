@@ -4,8 +4,14 @@ import { useAnswers } from "@/contexts/AnswersContext";
 import { useState, useEffect } from "react";
 
 export function AudioRecorder({ questionId }: { questionId: number }) {
-  const { isRecording, audioURL, isUploading, startRecording, stopRecording } =
-    useAudioRecorder(questionId);
+  const {
+    isRecording,
+    audioURL,
+    isUploading,
+    startRecording,
+    stopRecording,
+    initiateUploadAudio,
+  } = useAudioRecorder(questionId);
   const { addAnswer } = useAnswers();
   const [activeQuestionId, setActiveQuestionId] = useState<number | null>(null);
 
@@ -24,7 +30,6 @@ export function AudioRecorder({ questionId }: { questionId: number }) {
         questionId: activeQuestionId,
         audioUrl: audioURL,
         transcription: null,
-        questionData: null,
       });
       setActiveQuestionId(null);
     }

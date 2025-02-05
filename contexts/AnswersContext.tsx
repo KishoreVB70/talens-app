@@ -9,12 +9,14 @@ import React, {
 } from "react";
 import { supabase } from "@/lib/supabase";
 import quizData from "@/public/quizData.json";
+import { QuizQuestion } from "@/lib/types";
 
+// Todo: how is question data utilized, why was it initially any
 interface Answer {
   questionId: number;
   audioUrl: string;
   transcription: string | null;
-  questionData?: any;
+  questionData?: QuizQuestion;
 }
 
 interface AnswersContextType {
@@ -69,6 +71,14 @@ export function AnswersProvider({ children }: { children: ReactNode }) {
     return newInterviewId;
   };
 
+  // Todo: can add question data directly in the answer at source?
+  /*
+    Todo: Why is the array maintained if for each answer, it is uploaded directly
+    Answers is not utilized anywhere, probably has some connection with api/db/save
+  */
+  // 1) Add question details to the answer
+  // 2) Add answer to the answers state
+  // 3) upload answer to supabase
   const addAnswer = (answer: Answer) => {
     const questionData = quizData.questions.find(
       (q) => q.id === answer.questionId
@@ -87,6 +97,8 @@ export function AnswersProvider({ children }: { children: ReactNode }) {
       return newAnswers;
     });
 
+    // Upload the individual answer to supabase
+    // Todo: User intimation on error
     if (interviewId) {
       supabase
         .from("answers")
@@ -103,6 +115,8 @@ export function AnswersProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Clear answers and interviewId from state and sessionStorage
+  // Unused function
   const clearAnswers = () => {
     setAnswers([]);
     setInterviewId(null);
