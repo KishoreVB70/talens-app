@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { QuizQuestion } from "@/lib/types";
 import InterviewCard from "@/components/interview/InterviewCard";
 
+// Responsibility => Fetch quiz data and render InterviewCard
 export function InterviewInterfaceComponent() {
   // Question related state
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);

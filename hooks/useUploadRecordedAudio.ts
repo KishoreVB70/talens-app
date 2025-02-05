@@ -7,17 +7,14 @@ export default function useUploadRecordedAudio(
   questionId: number
 ) {
   const { interviewId } = useAnswers();
-  const [isUploading, setIsUploading] = useState(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
 
-  const initiateUploadAudio = async () => {
+  const uploadRecordedAudio = async () => {
     console.log("Recording stopped, processing audio...");
     const audioBlob = new Blob(chunksRef.current, { type: "audio/mp3" });
 
     // Todo: assess requirement for this url
-    const audioUrl = URL.createObjectURL(audioBlob);
-
-    setIsUploading(true);
+    // const audioUrl = URL.createObjectURL(audioBlob);
     try {
       const uploadedUrl = await uploadAudio(
         audioBlob,
@@ -28,10 +25,8 @@ export default function useUploadRecordedAudio(
       setAudioURL(uploadedUrl);
     } catch (error) {
       throw error;
-    } finally {
-      setIsUploading(false);
     }
   };
 
-  return { isUploading, initiateUploadAudio, audioURL };
+  return { uploadRecordedAudio, audioURL };
 }

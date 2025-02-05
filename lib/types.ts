@@ -6,3 +6,4 @@ export interface QuizQuestion {
   instructions: string[];
   timeLimit: number;
 }
+export type QuestionState = "ready" | "recording";

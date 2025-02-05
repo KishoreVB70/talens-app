@@ -6,9 +6,8 @@ import { useAnswers } from "@/contexts/AnswersContext";
 import { Card } from "@/components/ui/card";
 import QuestionsHeader from "@/components/interview/QuestionsHeader";
 import { QuestionReady } from "@/components/interview/QuestionReady";
-import { QuizQuestion } from "@/lib/types";
+import { QuestionState, QuizQuestion } from "@/lib/types";
 import useUploadRecordedAudio from "@/hooks/useUploadRecordedAudio";
-type QuestionState = "ready" | "recording";
 
 type InterviewCardProps = {
   questions: QuizQuestion[];
@@ -18,45 +17,48 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const currentQuestion = questions[currentQuestionIndex];
 
-  // Context
-  const { addAnswer } = useAnswers();
   // Hooks
-  const [questionState, setQuestionState] = useState<QuestionState>("ready");
-
+  const { addAnswer } = useAnswers();
   const { startRecording, stopRecording, chunksRef } = useAudioRecorder();
-
-  //Todo: analyze the case if the question or audioURL is undefined?
-  const { audioURL, initiateUploadAudio } = useUploadRecordedAudio(
+  // Info: Currently questions[index] can't be undefined
+  const { audioURL, uploadRecordedAudio } = useUploadRecordedAudio(
     chunksRef,
     questions[currentQuestionIndex]?.id
   );
 
-  // Todo: remove submitting, only required to trigger useEffect
-  // const [isSubmitting, setIsSubmitting] = useState(false);
-
+  // State
+  const [questionState, setQuestionState] = useState<QuestionState>("ready");
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadError, setIsUploadError] = useState(false);
 
-  async function submitAnswer() {
+  const handleReady = async () => {
+    await startRecording();
+    setQuestionState("recording");
+  };
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    stopRecording();
+
     // 1) Upload audio to supabase db
     try {
-      await initiateUploadAudio();
+      await uploadRecordedAudio();
     } catch (error) {
       console.error("Failed to upload audio", error);
       setIsLoading(false);
       setIsUploadError(true);
     }
 
+    // 2) Add answer to context
     if (!audioURL) return;
-    console.log("Adding answer to context:");
-
+    // Info: Doesn't return an error
     addAnswer({
       questionId: questions[currentQuestionIndex].id,
       audioUrl: audioURL,
       transcription: null,
     });
 
-    // Move to next question or summary page
+    // 3) Move to next question or summary page
     if (currentQuestionIndex < questions.length - 1) {
       // console.log("Moving to next question");
       setCurrentQuestionIndex((prev) => prev + 1);
@@ -68,19 +70,6 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
       window.location.href = "/summary";
     }
     setIsLoading(false);
-  }
-
-  const handleReady = async () => {
-    // console.log("Question ready, starting recording");
-    await startRecording();
-    setQuestionState("recording");
-  };
-
-  const handleSubmit = () => {
-    // console.log("Submitting answer");
-    setIsLoading(true);
-    stopRecording();
-    submitAnswer();
   };
 
   return (
