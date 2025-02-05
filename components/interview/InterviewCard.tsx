@@ -74,33 +74,23 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
 
   return (
     <Card className="max-w-xl w-full p-1.5 ">
+      {/* Header with question number, time limit, and recording status */}
+      <QuestionsHeader
+        questionIndex={currentQuestionIndex}
+        questionsLength={questions.length}
+        questionTimeLimit={currentQuestion.timeLimit}
+        questionId={currentQuestion.id}
+        isRecording={questionState === "recording"}
+      />
       {questionState === "ready" ? (
-        <>
-          <QuestionsHeader
-            questionIndex={currentQuestionIndex}
-            questionsLength={questions.length}
-            questionTimeLimit={currentQuestion.timeLimit}
-            questionId={currentQuestion.id}
-            isRecording={false}
-          />
-          {/* Preparation prompt */}
-          <QuestionReady
-            onReady={handleReady}
-            questionNumber={currentQuestionIndex + 1}
-            totalQuestions={questions.length}
-          />
-        </>
+        <QuestionReady
+          onReady={handleReady}
+          questionNumber={currentQuestionIndex + 1}
+          totalQuestions={questions.length}
+        />
       ) : (
         // Recording state
         <>
-          {/* Display question, question number and timer */}
-          <QuestionsHeader
-            questionIndex={currentQuestionIndex}
-            questionsLength={questions.length}
-            questionTimeLimit={currentQuestion.timeLimit}
-            questionId={currentQuestion.id}
-            isRecording={true}
-          />
           <QuestionDisplay
             questionNumber={currentQuestionIndex + 1}
             questionTitle={currentQuestion.title}
