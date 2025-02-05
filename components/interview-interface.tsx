@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Timer } from "@/components/Timer";
 import { QuestionDisplay } from "@/components/QuestionDisplay";
 import { Button } from "@/components/ui/button";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useAnswers } from "@/contexts/AnswersContext";
 import { Card } from "@/components/ui/card";
-import QuestionReadyState from "@/components/interview/QuestionReadyState";
+import QuestionsHeader from "@/components/interview/QuestionsHeader";
+import { QuestionReady } from "@/components/interview/QuestionReady";
 
 interface QuizQuestion {
   id: number;
@@ -97,7 +97,7 @@ export function InterviewInterfaceComponent() {
 
   return (
     <div className="min-h-screen p-5 flex flex-col">
-      <header className="flex justify-between items-center mb-5">
+      {/* <header className="flex justify-between items-center mb-5">
         <div
           className="text-lg font-medium text-[#1c3c1c]"
           aria-label="Progress"
@@ -108,76 +108,61 @@ export function InterviewInterfaceComponent() {
           initialTime={currentQuestion.timeLimit}
           timerKey={currentQuestion.id}
         />
-      </header>
+      </header> */}
 
       <main className="flex-grow flex flex-col justify-center items-center space-y-5">
         <Card className="max-w-xl w-full p-1.5 ">
           {questionState === "ready" ? (
-            <QuestionReadyState
-              questionIndex={currentQuestionIndex}
-              questionsLength={questions.length}
-              questionTimeLimit={currentQuestion.timeLimit}
-              questionId={currentQuestion.id}
-              handleReady={handleReady}
-            />
+            <>
+              <QuestionsHeader
+                questionIndex={currentQuestionIndex}
+                questionsLength={questions.length}
+                questionTimeLimit={currentQuestion.timeLimit}
+                questionId={currentQuestion.id}
+                isRecording={false}
+              />
+              {/* Preparation prompt */}
+              <QuestionReady
+                onReady={handleReady}
+                questionNumber={currentQuestionIndex + 1}
+                totalQuestions={questions.length}
+              />
+            </>
           ) : (
             // Recording state
-            // <div>
-            //   <div className="flex  w-full justify-between py-5 px-6 ">
-            //     <div className="flex items-center gap-1 w-1/3">
-            //       <span className="relative flex h-3 w-3">
-            //         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            //         <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-            //       </span>
-            //       <span className="text-xs font-medium tracking-wide uppercase ">
-            //         Recording
-            //       </span>
-            //     </div>
+            <div>
+              {/* Display question, question number and timer */}
+              <QuestionsHeader
+                questionIndex={currentQuestionIndex}
+                questionsLength={questions.length}
+                questionTimeLimit={currentQuestion.timeLimit}
+                questionId={currentQuestion.id}
+                isRecording={true}
+              />
+              <QuestionDisplay
+                questionNumber={currentQuestionIndex + 1}
+                questionTitle={currentQuestion.title}
+                questionText={currentQuestion.questionText}
+                instructions={currentQuestion.instructions}
+              />
 
-            //     <div className="tabular-nums text-sm text-center w-1/3">
-            //       {" "}
-            //       {currentQuestionIndex + 1} of {questions.length}
-            //     </div>
-            //     <div className="flex justify-end w-1/3">
-            //       <Timer
-            //         initialTime={currentQuestion.timeLimit}
-            //         timerKey={currentQuestion.id}
-            //       />
-            //     </div>
-            //   </div>
-            //   <div className="relative  bg-foreground/15 rounded-full h-1 mx-6">
-            //     <div
-            //       className="absolute bg-primary rounded-full h-1"
-            //       style={{
-            //         width: `${
-            //           ((currentQuestionIndex + 1) / questions.length) * 100
-            //         }%`,
-            //       }}
-            //     ></div>
-            //   </div>
-            //   <QuestionDisplay
-            //     questionNumber={currentQuestionIndex + 1}
-            //     questionTitle={currentQuestion.title}
-            //     questionText={currentQuestion.questionText}
-            //     instructions={currentQuestion.instructions}
-            //   />
-
-            //   <Button
-            //     onClick={handleSubmit}
-            //     className="w-full "
-            //     size="lg"
-            //     disabled={isLoading}
-            //   >
-            //     {isLoading ? (
-            //       <div className="flex items-center justify-center gap-2">
-            //         <div className="w-4 h-4 border-2 border-[#1c3c1c] border-t-transparent rounded-full animate-spin" />
-            //         <span>Processing...</span>
-            //       </div>
-            //     ) : (
-            //       "Submit Answer"
-            //     )}
-            //   </Button>
-            // </div>
+              {/* Submit Button */}
+              <Button
+                onClick={handleSubmit}
+                className="w-full "
+                size="lg"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-[#1c3c1c] border-t-transparent rounded-full animate-spin" />
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  "Submit Answer"
+                )}
+              </Button>
+            </div>
           )}
         </Card>
       </main>
