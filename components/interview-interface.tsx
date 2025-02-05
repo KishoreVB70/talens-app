@@ -6,8 +6,8 @@ import { QuestionDisplay } from "@/components/QuestionDisplay";
 import { Button } from "@/components/ui/button";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useAnswers } from "@/contexts/AnswersContext";
-import { QuestionReady } from "@/components/QuestionReady";
 import { Card } from "@/components/ui/card";
+import QuestionReadyState from "@/components/interview/QuestionReadyState";
 
 interface QuizQuestion {
   id: number;
@@ -17,6 +17,7 @@ interface QuizQuestion {
   timeLimit: number;
 }
 
+// Todo: Can change into enum
 type QuestionState = "ready" | "recording";
 
 export function InterviewInterfaceComponent() {
@@ -37,7 +38,7 @@ export function InterviewInterfaceComponent() {
       .catch((error) => console.error("Error fetching quiz data:", error));
   }, []);
 
-  // New useEffect to handle submission
+  // Handle submission
   useEffect(() => {
     console.log("Submission effect triggered:", {
       isSubmitting,
@@ -96,112 +97,87 @@ export function InterviewInterfaceComponent() {
 
   return (
     <div className="min-h-screen p-5 flex flex-col">
-      {/* 
-        <header className="flex justify-between items-center mb-5">
-        <div className="text-lg font-medium text-[#1c3c1c]" aria-label="Progress">
+      <header className="flex justify-between items-center mb-5">
+        <div
+          className="text-lg font-medium text-[#1c3c1c]"
+          aria-label="Progress"
+        >
           Question {currentQuestionIndex + 1} of {questions.length}
         </div>
-        <Timer 
-          initialTime={currentQuestion.timeLimit} 
+        <Timer
+          initialTime={currentQuestion.timeLimit}
           timerKey={currentQuestion.id}
         />
       </header>
-      
-      */}
 
       <main className="flex-grow flex flex-col justify-center items-center space-y-5">
         <Card className="max-w-xl w-full p-1.5 ">
           {questionState === "ready" ? (
-            <div>
-              <div className="flex  w-full justify-between py-5 px-6 ">
-                <div className="flex items-center gap-1 w-1/3">
-                  <span className="text-sm ">Question</span>
-                </div>
-
-                <div className="tabular-nums text-sm text-center w-1/3">
-                  {" "}
-                  {currentQuestionIndex + 1} of {questions.length}
-                </div>
-                <div className="flex justify-end w-1/3">
-                  <Timer
-                    initialTime={currentQuestion.timeLimit}
-                    timerKey={currentQuestion.id}
-                  />
-                </div>
-              </div>
-              <div className="relative  bg-foreground/15 rounded-full h-1 mx-6">
-                <div
-                  className="absolute bg-primary rounded-full h-1"
-                  style={{
-                    width: `${
-                      ((currentQuestionIndex + 1) / questions.length) * 100
-                    }%`,
-                  }}
-                ></div>
-              </div>
-              <QuestionReady
-                onReady={handleReady}
-                questionNumber={currentQuestionIndex + 1}
-                totalQuestions={questions.length}
-              />
-            </div>
+            <QuestionReadyState
+              questionIndex={currentQuestionIndex}
+              questionsLength={questions.length}
+              questionTimeLimit={currentQuestion.timeLimit}
+              questionId={currentQuestion.id}
+              handleReady={handleReady}
+            />
           ) : (
-            <div>
-              <div className="flex  w-full justify-between py-5 px-6 ">
-                <div className="flex items-center gap-1 w-1/3">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                  </span>
-                  <span className="text-xs font-medium tracking-wide uppercase ">
-                    Recording
-                  </span>
-                </div>
+            // Recording state
+            // <div>
+            //   <div className="flex  w-full justify-between py-5 px-6 ">
+            //     <div className="flex items-center gap-1 w-1/3">
+            //       <span className="relative flex h-3 w-3">
+            //         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            //         <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            //       </span>
+            //       <span className="text-xs font-medium tracking-wide uppercase ">
+            //         Recording
+            //       </span>
+            //     </div>
 
-                <div className="tabular-nums text-sm text-center w-1/3">
-                  {" "}
-                  {currentQuestionIndex + 1} of {questions.length}
-                </div>
-                <div className="flex justify-end w-1/3">
-                  <Timer
-                    initialTime={currentQuestion.timeLimit}
-                    timerKey={currentQuestion.id}
-                  />
-                </div>
-              </div>
-              <div className="relative  bg-foreground/15 rounded-full h-1 mx-6">
-                <div
-                  className="absolute bg-primary rounded-full h-1"
-                  style={{
-                    width: `${
-                      ((currentQuestionIndex + 1) / questions.length) * 100
-                    }%`,
-                  }}
-                ></div>
-              </div>
-              <QuestionDisplay
-                questionNumber={currentQuestionIndex + 1}
-                questionTitle={currentQuestion.title}
-                questionText={currentQuestion.questionText}
-                instructions={currentQuestion.instructions}
-              />
+            //     <div className="tabular-nums text-sm text-center w-1/3">
+            //       {" "}
+            //       {currentQuestionIndex + 1} of {questions.length}
+            //     </div>
+            //     <div className="flex justify-end w-1/3">
+            //       <Timer
+            //         initialTime={currentQuestion.timeLimit}
+            //         timerKey={currentQuestion.id}
+            //       />
+            //     </div>
+            //   </div>
+            //   <div className="relative  bg-foreground/15 rounded-full h-1 mx-6">
+            //     <div
+            //       className="absolute bg-primary rounded-full h-1"
+            //       style={{
+            //         width: `${
+            //           ((currentQuestionIndex + 1) / questions.length) * 100
+            //         }%`,
+            //       }}
+            //     ></div>
+            //   </div>
+            //   <QuestionDisplay
+            //     questionNumber={currentQuestionIndex + 1}
+            //     questionTitle={currentQuestion.title}
+            //     questionText={currentQuestion.questionText}
+            //     instructions={currentQuestion.instructions}
+            //   />
 
-              <Button
-                onClick={handleSubmit}
-                className="w-full "
-                size="lg"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-[#1c3c1c] border-t-transparent rounded-full animate-spin" />
-                    <span>Processing...</span>
-                  </div>
-                ) : (
-                  "Submit Answer"
-                )}
-              </Button>
-            </div>
+            //   <Button
+            //     onClick={handleSubmit}
+            //     className="w-full "
+            //     size="lg"
+            //     disabled={isLoading}
+            //   >
+            //     {isLoading ? (
+            //       <div className="flex items-center justify-center gap-2">
+            //         <div className="w-4 h-4 border-2 border-[#1c3c1c] border-t-transparent rounded-full animate-spin" />
+            //         <span>Processing...</span>
+            //       </div>
+            //     ) : (
+            //       "Submit Answer"
+            //     )}
+            //   </Button>
+            // </div>
           )}
         </Card>
       </main>
