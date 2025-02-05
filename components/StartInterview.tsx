@@ -4,11 +4,8 @@ import { useAnswers } from "@/contexts/AnswersContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-type StartInterviewProps = {
-  name: string;
-};
-function StartInterview({ name }: StartInterviewProps) {
-  const { initializeInterview } = useAnswers();
+function StartInterview() {
+  const { initializeInterview, userName } = useAnswers();
   const router = useRouter();
 
   const handleStartInterview = () => {
@@ -20,7 +17,7 @@ function StartInterview({ name }: StartInterviewProps) {
       <Card className="max-w-xl w-full p-1.5 space-y-10">
         <div className="flex flex-col  mx-6 mt-5">
           <h2 className="text-xl md:text-2xl tracking-tight font-semibold leading-tight md:leading-tight ">
-            Welcome, {name}!
+            Welcome, {userName}!
           </h2>
           <p className="text-xl md:text-2xl tracking-tight opacity-50 leading-tight md:leading-tight">
             Please review the following instructions

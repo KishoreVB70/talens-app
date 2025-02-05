@@ -1,5 +1,5 @@
 import { QuestionReady } from "@/components/interview/QuestionReady";
-import { Timer } from "@/components/Timer";
+import { Timer } from "@/components/interview/Timer";
 import React from "react";
 
 type QuestionReadyStateProps = {

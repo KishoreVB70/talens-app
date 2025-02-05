@@ -1,62 +1,67 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+);
 
 export async function POST(request: Request) {
   try {
-    console.log('Received upload request')
-    const formData = await request.formData()
-    const file = formData.get('file') as File
-    const questionId = formData.get('questionId') as string
-    const interviewId = formData.get('interviewId') as string
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+    const questionId = formData.get("questionId") as string;
+    const interviewId = formData.get("interviewId") as string;
 
-    console.log('Upload request details:', {
+    // Todo: Why questinId is initially not required?
+    if (!file || !interviewId || !questionId) {
+      console.error("Missing required fields:", {
+        file: !!file,
+        interviewId,
+        questionId,
+      });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    console.log("Upload request details:", {
       questionId,
       interviewId,
       fileSize: file?.size,
-      fileName: file?.name
-    })
+      fileName: file?.name,
+    });
 
-    if (!file || !interviewId) {
-      console.error('Missing required fields:', { file: !!file, interviewId })
-      return NextResponse.json(
-        { error: 'Missing required fields' }, 
-        { status: 400 }
-      )
-    }
-
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
 
     // Upload to Supabase Storage
-    const fileName = `answer_${interviewId}_${questionId}_${Date.now()}.mp3`
-    const { data: uploadData, error: uploadError } = await supabase
-      .storage
-      .from('interview-answers')
+    const fileName = `answer_${interviewId}_${questionId}_${Date.now()}.mp3`;
+    const { data: _uploadData, error: uploadError } = await supabase.storage
+      .from("interview-answers")
       .upload(fileName, buffer, {
-        contentType: 'audio/mp3'
-      })
+        contentType: "audio/mp3",
+      });
 
-    if (uploadError) throw uploadError
+    if (uploadError) throw uploadError;
 
     // Get public URL
-    const { data: { publicUrl } } = supabase
-      .storage
-      .from('interview-answers')
-      .getPublicUrl(fileName)
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("interview-answers").getPublicUrl(fileName);
 
-    console.log('File uploaded to storage:', {
+    console.log("File uploaded to storage:", {
       fileName,
-      publicUrl
-    })
+      publicUrl,
+    });
 
-    return NextResponse.json({ url: publicUrl })
+    return NextResponse.json({ url: publicUrl });
   } catch (error) {
-    console.error('Error in upload handler:', error)
-    return NextResponse.json({ error: 'Error uploading file' }, { status: 500 })
+    console.error("Error in upload handler:", error);
+    return NextResponse.json(
+      { error: "Error uploading file" },
+      { status: 500 }
+    );
   }
-} 
+}

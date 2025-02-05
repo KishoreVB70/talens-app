@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 import AuthPage from "@/components/AuthPage";
-import { Step } from "@/lib/types";
+import { StartingStep } from "@/lib/types";
 import StartInterview from "@/components/StartInterview";
 
 export default function StartingScreen() {
-  const [step, setStep] = useState<Step>("auth");
-  const [name, setName] = useState("");
+  const [step, setStep] = useState<StartingStep>("auth");
 
-  if (step === "auth") return <AuthPage setStep={setStep} setName={setName} />;
+  if (step === "auth") return <AuthPage setStep={setStep} />;
 
-  return <StartInterview name={name} />;
+  return <StartInterview />;
 }

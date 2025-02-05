@@ -1,36 +1,39 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { QuestionDisplay } from "@/components/QuestionDisplay";
+import { QuestionDisplay } from "@/components/interview/QuestionDisplay";
 import { Button } from "@/components/ui/button";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useAnswers } from "@/contexts/AnswersContext";
 import { Card } from "@/components/ui/card";
 import QuestionsHeader from "@/components/interview/QuestionsHeader";
 import { QuestionReady } from "@/components/interview/QuestionReady";
-
-interface QuizQuestion {
-  id: number;
-  title: string;
-  questionText: string;
-  instructions: string[];
-  timeLimit: number;
-}
+import { QuizQuestion } from "@/lib/types";
 
 // Todo: Can change into enum
 type QuestionState = "ready" | "recording";
 
 export function InterviewInterfaceComponent() {
+  // Context
+  const { addAnswer } = useAnswers();
+
+  // Question related state
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questionState, setQuestionState] = useState<QuestionState>("ready");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Hooks
+  //Todo: What in the case if the question is undefined?
   const { startRecording, stopRecording, audioURL } = useAudioRecorder(
     questions[currentQuestionIndex]?.id
   );
-  const { addAnswer } = useAnswers();
 
+  // Todo: remove submitting, only required to trigger useEffect
+  // const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Data fetching
   useEffect(() => {
     fetch("/quizData.json")
       .then((response) => response.json())
@@ -38,52 +41,80 @@ export function InterviewInterfaceComponent() {
       .catch((error) => console.error("Error fetching quiz data:", error));
   }, []);
 
+  // Todo: Analyze the requirement of useEFfect and Change useEffect to function
   // Handle submission
-  useEffect(() => {
-    console.log("Submission effect triggered:", {
-      isSubmitting,
-      audioURL,
-      currentQuestionIndex,
-      questionId: questions[currentQuestionIndex]?.id,
+  // Add audio url to context and move to next question or move to summary page
+  // useEffect(() => {
+  //   // console.log("Submission effect triggered:", {
+  //   //   isSubmitting,
+  //   //   audioURL,
+  //   //   currentQuestionIndex,
+  //   //   questionId: questions[currentQuestionIndex]?.id,
+  //   // });
+
+  //   if (isSubmitting && audioURL) {
+  //     // console.log("Adding answer to context:", {
+  //     //   questionId: questions[currentQuestionIndex].id,
+  //     //   audioUrl: audioURL,
+  //     // });
+
+  //     addAnswer({
+  //       questionId: questions[currentQuestionIndex].id,
+  //       audioUrl: audioURL,
+  //       transcription: null,
+  //     });
+
+  //     if (currentQuestionIndex < questions.length - 1) {
+  //       // console.log("Moving to next question");
+  //       setCurrentQuestionIndex((prev) => prev + 1);
+  //       setQuestionState("ready");
+  //     } else {
+  //       // console.log("Interview complete, redirecting to summary");
+  //       // Todo: Use router for navigation?
+  //       // Causes hard refresh on the page
+  //       window.location.href = "/summary";
+  //     }
+
+  //     setIsSubmitting(false);
+  //     setIsLoading(false);
+  //   }
+  // }, [isSubmitting, audioURL, currentQuestionIndex, questions, addAnswer]);
+
+  function submitAnswer() {
+    if (!audioURL) return;
+    console.log("Adding answer to context:");
+
+    addAnswer({
+      questionId: questions[currentQuestionIndex].id,
+      audioUrl: audioURL,
+      transcription: null,
     });
 
-    if (isSubmitting && audioURL) {
-      console.log("Adding answer to context:", {
-        questionId: questions[currentQuestionIndex].id,
-        audioUrl: audioURL,
-      });
-
-      addAnswer({
-        questionId: questions[currentQuestionIndex].id,
-        audioUrl: audioURL,
-        transcription: null,
-      });
-
-      if (currentQuestionIndex < questions.length - 1) {
-        console.log("Moving to next question");
-        setCurrentQuestionIndex((prev) => prev + 1);
-        setQuestionState("ready");
-      } else {
-        console.log("Interview complete, redirecting to summary");
-        window.location.href = "/summary";
-      }
-
-      setIsSubmitting(false);
-      setIsLoading(false);
+    // Move to next question or summary page
+    if (currentQuestionIndex < questions.length - 1) {
+      // console.log("Moving to next question");
+      setCurrentQuestionIndex((prev) => prev + 1);
+      setQuestionState("ready");
+    } else {
+      // console.log("Interview complete, redirecting to summary");
+      // Todo: Use router for navigation?
+      // Causes hard refresh on the page
+      window.location.href = "/summary";
     }
-  }, [isSubmitting, audioURL, currentQuestionIndex, questions, addAnswer]);
+    setIsLoading(false);
+  }
 
   const handleReady = async () => {
-    console.log("Question ready, starting recording");
+    // console.log("Question ready, starting recording");
     await startRecording();
     setQuestionState("recording");
   };
 
   const handleSubmit = () => {
-    console.log("Submitting answer");
+    // console.log("Submitting answer");
     setIsLoading(true);
-    setIsSubmitting(true);
     stopRecording();
+    submitAnswer();
   };
 
   if (questions.length === 0)
@@ -97,19 +128,6 @@ export function InterviewInterfaceComponent() {
 
   return (
     <div className="min-h-screen p-5 flex flex-col">
-      {/* <header className="flex justify-between items-center mb-5">
-        <div
-          className="text-lg font-medium text-[#1c3c1c]"
-          aria-label="Progress"
-        >
-          Question {currentQuestionIndex + 1} of {questions.length}
-        </div>
-        <Timer
-          initialTime={currentQuestion.timeLimit}
-          timerKey={currentQuestion.id}
-        />
-      </header> */}
-
       <main className="flex-grow flex flex-col justify-center items-center space-y-5">
         <Card className="max-w-xl w-full p-1.5 ">
           {questionState === "ready" ? (

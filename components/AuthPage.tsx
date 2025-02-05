@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { VALID_ACCESS_CODE } from "@/lib/contants";
-import { Step } from "@/lib/types";
+import { StartingStep } from "@/lib/types";
 
 type AuthPageProps = {
-  setStep: (step: Step) => void;
-  setName: (name: string) => void;
+  setStep: (step: StartingStep) => void;
 };
-function AuthPage({ setStep, setName }: AuthPageProps) {
+
+function AuthPage({ setStep }: AuthPageProps) {
   const { setUserName } = useAnswers();
   const [error, setError] = useState("");
 
@@ -36,7 +36,6 @@ function AuthPage({ setStep, setName }: AuthPageProps) {
 
     setUserName(name);
     setStep("instructions");
-    setName(name);
   };
 
   return (
