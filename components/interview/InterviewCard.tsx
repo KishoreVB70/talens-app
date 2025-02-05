@@ -30,6 +30,7 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
   const [questionState, setQuestionState] = useState<QuestionState>("ready");
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadError, setIsUploadError] = useState(false);
+  const submitButtonText = isUploadError ? "Retry" : "Submit Answer";
 
   const handleReady = async () => {
     await startRecording();
@@ -83,21 +84,14 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
         isRecording={questionState === "recording"}
       />
       {questionState === "ready" ? (
-        <QuestionReady
-          onReady={handleReady}
-          questionNumber={currentQuestionIndex + 1}
-          totalQuestions={questions.length}
-        />
+        <QuestionReady onReady={handleReady} />
       ) : (
         // Recording state
         <>
           <QuestionDisplay
             questionNumber={currentQuestionIndex + 1}
-            questionTitle={currentQuestion.title}
-            questionText={currentQuestion.questionText}
-            instructions={currentQuestion.instructions}
+            question={currentQuestion}
           />
-
           {/* Submit Button */}
           <Button
             onClick={handleSubmit}
@@ -110,10 +104,8 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
                 <div className="w-4 h-4 border-2 border-[#1c3c1c] border-t-transparent rounded-full animate-spin" />
                 <span>Processing...</span>
               </div>
-            ) : isUploadError ? (
-              "Retry"
             ) : (
-              "Submit Answer"
+              submitButtonText
             )}
           </Button>
         </>

@@ -1,11 +1,14 @@
+import { QuizQuestion } from "@/lib/types";
+
 interface QuestionDisplayProps {
-  questionNumber: number
-  questionTitle: string
-  questionText: string
-  instructions: string[]
+  questionNumber: number;
+  question: QuizQuestion;
 }
 
-export function QuestionDisplay({ questionTitle, questionText, instructions }: QuestionDisplayProps) {
+export function QuestionDisplay({ question }: QuestionDisplayProps) {
+  const questionTitle = question.title;
+  const questionText = question.questionText;
+  const instructions = question.instructions;
   return (
     <div className="w-full mb-10  mt-5">
       <div className=" px-6 ">
@@ -20,7 +23,9 @@ export function QuestionDisplay({ questionTitle, questionText, instructions }: Q
 
         {instructions && (
           <div className="space-y-4 border-t pt-5 border-foreground/15">
-            <h3 className="text-xs font-semibold uppercase tracking-wide -mb-2">Interview Instructions</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wide -mb-2">
+              Interview Instructions
+            </h3>
             <div className="space-y-1">
               {Array.isArray(instructions) ? (
                 instructions.map((instruction, index) => (
@@ -34,5 +39,5 @@ export function QuestionDisplay({ questionTitle, questionText, instructions }: Q
         )}
       </div>
     </div>
-  )
+  );
 }

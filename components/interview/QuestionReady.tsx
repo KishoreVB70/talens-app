@@ -3,23 +3,11 @@ import { Mic, Speech, CheckSquare } from "lucide-react";
 
 interface QuestionReadyProps {
   onReady: () => void;
-  questionNumber: number;
-  totalQuestions: number;
 }
 
-export function QuestionReady({
-  onReady,
-  questionNumber,
-  totalQuestions,
-}: QuestionReadyProps) {
+export function QuestionReady({ onReady }: QuestionReadyProps) {
   return (
     <div className=" w-full space-y-8">
-      {/* 
-        <h2 className="text-2xl font-semibold text-[#1c3c1c] text-center mb-6">
-          Question {questionNumber} of {totalQuestions}
-        </h2>
-      */}
-
       <div className="flex flex-col  mx-6 mt-5">
         <h3 className="text-xl md:text-2xl tracking-tight font-semibold leading-tight md:leading-tight">
           Before you begin
