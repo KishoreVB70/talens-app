@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { QuestionDisplay } from "@/components/interview/QuestionDisplay";
 import { Button } from "@/components/ui/button";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
@@ -15,53 +15,21 @@ type InterviewCardProps = {
 
 export default function InterviewCard({ questions }: InterviewCardProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [questionState, setQuestionState] = useState<QuestionState>("ready");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const currentQuestion = questions[currentQuestionIndex];
 
+  // Hooks
   const { addAnswer } = useAnswers();
   const { startRecording, stopRecording, chunksRef } = useAudioRecorder();
 
   // Info: Currently questions[index] can't be undefined
-  const { audioURL } = useUploadRecordedAudio(
+  const { audioURL, uploadRecordedAudio } = useUploadRecordedAudio(
     chunksRef,
     questions[currentQuestionIndex]?.id
   );
 
-  // New useEffect to handle submission
-  useEffect(() => {
-    console.log("Submission effect triggered:", {
-      isSubmitting,
-      audioURL,
-      currentQuestionIndex,
-      questionId: questions[currentQuestionIndex]?.id,
-    });
-
-    if (isSubmitting && audioURL) {
-      console.log("Adding answer to context:", {
-        questionId: questions[currentQuestionIndex].id,
-        audioUrl: audioURL,
-      });
-
-      addAnswer({
-        questionId: questions[currentQuestionIndex].id,
-        audioUrl: audioURL,
-        transcription: null,
-      });
-
-      if (currentQuestionIndex < questions.length - 1) {
-        console.log("Moving to next question");
-        setCurrentQuestionIndex((prev) => prev + 1);
-        setQuestionState("ready");
-      } else {
-        console.log("Interview complete, redirecting to summary");
-        window.location.href = "/summary";
-      }
-
-      setIsSubmitting(false);
-      setIsLoading(false);
-    }
-  }, [isSubmitting, audioURL, currentQuestionIndex, questions, addAnswer]);
+  // State
+  const [questionState, setQuestionState] = useState<QuestionState>("ready");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleReady = async () => {
     console.log("Question ready, starting recording");
@@ -69,12 +37,47 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
     setQuestionState("recording");
   };
 
-  const handleSubmit = () => {
-    console.log("Submitting answer");
+  const handleSubmit = useCallback(async () => {
     setIsLoading(true);
-    setIsSubmitting(true);
     stopRecording();
-  };
+
+    // 1) Upload audio to supabase db
+    try {
+      await uploadRecordedAudio();
+    } catch (error) {
+      console.error("Failed to upload audio", error);
+      setIsLoading(false);
+    }
+
+    // 2) Add answer to context
+    if (!audioURL) return;
+    // Doesn't return an error
+    addAnswer({
+      questionId: questions[currentQuestionIndex].id,
+      audioUrl: audioURL,
+      transcription: null,
+    });
+
+    // 3) Move to next question or summary page
+    if (currentQuestionIndex < questions.length - 1) {
+      // console.log("Moving to next question");
+      setCurrentQuestionIndex((prev) => prev + 1);
+      setQuestionState("ready");
+    } else {
+      // console.log("Interview complete, redirecting to summary");
+      // Todo: Use router for navigation?
+      // Causes hard refresh on the page
+      window.location.href = "/summary";
+    }
+    setIsLoading(false);
+  }, [
+    addAnswer,
+    audioURL,
+    currentQuestionIndex,
+    questions,
+    stopRecording,
+    uploadRecordedAudio,
+  ]);
 
   if (questions.length === 0) {
     return (
@@ -83,8 +86,6 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
       </div>
     );
   }
-
-  const currentQuestion = questions[currentQuestionIndex];
 
   return (
     <Card className="max-w-xl w-full p-1.5 ">
