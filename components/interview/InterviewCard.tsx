@@ -79,14 +79,6 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
     uploadRecordedAudio,
   ]);
 
-  if (questions.length === 0) {
-    return (
-      <div className="w-full flex flex-col items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
-
   return (
     <Card className="max-w-xl w-full p-1.5 ">
       <QuestionsHeader
