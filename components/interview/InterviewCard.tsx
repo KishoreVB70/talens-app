@@ -7,6 +7,7 @@ import { QuestionReady } from "@/components/interview/QuestionReady";
 import { Card } from "@/components/ui/card";
 import { QuestionState, QuizQuestion } from "@/lib/types";
 import QuestionsHeader from "@/components/interview/QuestionHeader";
+import useUploadRecordedAudio from "@/hooks/useUploadRecordedAudio";
 
 type InterviewCardProps = {
   questions: QuizQuestion[];
@@ -17,10 +18,15 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
   const [questionState, setQuestionState] = useState<QuestionState>("ready");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { startRecording, stopRecording, audioURL } = useAudioRecorder(
+
+  const { addAnswer } = useAnswers();
+  const { startRecording, stopRecording, chunksRef } = useAudioRecorder();
+
+  // Info: Currently questions[index] can't be undefined
+  const { audioURL } = useUploadRecordedAudio(
+    chunksRef,
     questions[currentQuestionIndex]?.id
   );
-  const { addAnswer } = useAnswers();
 
   // New useEffect to handle submission
   useEffect(() => {
