@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 export async function POST(request: Request) {
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       console.error("Missing required fields:", { file: !!file, interviewId });
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     // Upload to Supabase Storage
     const fileName = `answer_${interviewId}_${questionId}_${Date.now()}.mp3`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("interview-answers")
       .upload(fileName, buffer, {
         contentType: "audio/mp3",
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     console.error("Error in upload handler:", error);
     return NextResponse.json(
       { error: "Error uploading file" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
