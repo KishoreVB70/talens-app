@@ -9,12 +9,13 @@ import React, {
 } from "react";
 import { supabase } from "@/lib/supabase";
 import quizData from "@/public/quizData.json";
+import { QuizQuestion } from "@/lib/types";
 
 interface Answer {
   questionId: number;
   audioUrl: string;
   transcription: string | null;
-  questionData?: any;
+  questionData?: QuizQuestion;
 }
 
 interface AnswersContextType {
@@ -70,7 +71,7 @@ export function AnswersProvider({ children }: { children: ReactNode }) {
 
   const addAnswer = (answer: Answer) => {
     const questionData = quizData.questions.find(
-      (q) => q.id === answer.questionId,
+      (q) => q.id === answer.questionId
     );
 
     const answerWithQuestionData = {
