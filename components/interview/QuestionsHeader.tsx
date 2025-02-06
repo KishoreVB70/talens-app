@@ -1,4 +1,5 @@
 import { Timer } from "@/components/interview/Timer";
+import TimerDisplay from "@/components/interview/TimerDisplay";
 import React from "react";
 
 type QuestionsHeaderProps = {
@@ -37,11 +38,15 @@ function QuestionsHeader({
           {questionIndex + 1} of {questionsLength}
         </div>
         <div className="flex justify-end w-1/3">
-          <Timer
-            initialTime={questionTimeLimit}
-            timerKey={questionId}
-            handleSubmit={handleSubmit}
-          />
+          {isRecording ? (
+            <Timer
+              initialTime={questionTimeLimit}
+              timerKey={questionId}
+              handleSubmit={handleSubmit}
+            />
+          ) : (
+            <TimerDisplay time={questionTimeLimit} />
+          )}
         </div>
       </div>
       {/* Progress bar */}
