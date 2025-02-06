@@ -93,12 +93,7 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
         <QuestionReady onReady={handleReady} />
       ) : (
         <>
-          <QuestionDisplay
-            questionNumber={currentQuestionIndex + 1}
-            questionTitle={currentQuestion.title}
-            questionText={currentQuestion.questionText}
-            instructions={currentQuestion.instructions}
-          />
+          <QuestionDisplay question={currentQuestion} />
 
           <Button
             onClick={handleSubmit}
