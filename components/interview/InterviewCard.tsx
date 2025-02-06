@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { QuestionDisplay } from "@/components/interview/QuestionDisplay";
 import { Button } from "@/components/ui/button";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
@@ -20,7 +20,6 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
   // Hooks
   const { addAnswer } = useAnswers();
   const { startRecording, stopRecording, chunksRef } = useAudioRecorder();
-
   // Info: Currently questions[index] can't be undefined
   const { audioURL, uploadRecordedAudio } = useUploadRecordedAudio(
     chunksRef,
@@ -30,9 +29,10 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
   // State
   const [questionState, setQuestionState] = useState<QuestionState>("ready");
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadError, setIsUploadError] = useState(false);
+  const submitButtonText = isUploadError ? "Retry" : "Submit Answer";
 
   const handleReady = async () => {
-    console.log("Question ready, starting recording");
     await startRecording();
     setQuestionState("recording");
   };
@@ -47,6 +47,7 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
     } catch (error) {
       console.error("Failed to upload audio", error);
       setIsLoading(false);
+      setIsUploadError(true);
     }
 
     // 2) Add answer to context
@@ -111,7 +112,7 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
                 <span>Processing...</span>
               </div>
             ) : (
-              "Submit Answer"
+              submitButtonText
             )}
           </Button>
         </>
