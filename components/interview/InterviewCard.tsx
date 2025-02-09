@@ -30,7 +30,9 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
   const [questionState, setQuestionState] = useState<QuestionState>("ready");
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadError, setIsUploadError] = useState(false);
-  const submitButtonText = isUploadError ? "Retry" : "Submit Answer";
+  const submitButtonText = isUploadError
+    ? "Answer upload failed: Retry"
+    : "Submit Answer";
 
   const handleReady = async () => {
     await startRecording();
