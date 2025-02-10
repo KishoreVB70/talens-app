@@ -7,6 +7,7 @@ type QuestionsHeaderProps = {
   questionsLength: number;
   questionTimeLimit: number;
   questionId: number;
+  stopRecording: () => void;
 };
 
 //Todo: can move handleSubmit to context (avoid prop drilling)
@@ -16,6 +17,7 @@ function QuestionsHeader({
   questionTimeLimit,
   questionId,
   isRecording,
+  stopRecording,
 }: QuestionsHeaderProps) {
   return (
     <>
@@ -36,7 +38,11 @@ function QuestionsHeader({
           {questionIndex + 1} of {questionsLength}
         </div>
         <div className="flex justify-end w-1/3">
-          <Timer initialTime={questionTimeLimit} timerKey={questionId} />
+          <Timer
+            initialTime={questionTimeLimit}
+            timerKey={questionId}
+            stopRecording={stopRecording}
+          />
         </div>
       </div>
       {/* Progress bar */}

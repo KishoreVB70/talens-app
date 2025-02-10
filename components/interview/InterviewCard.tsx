@@ -1,13 +1,11 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { QuestionDisplay } from "@/components/interview/QuestionDisplay";
 import { Button } from "@/components/ui/button";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
-import { useAnswers } from "@/contexts/AnswersContext";
 import { QuestionReady } from "@/components/interview/QuestionReady";
 import { Card } from "@/components/ui/card";
 import { QuestionState, QuizQuestion } from "@/lib/types";
 import QuestionsHeader from "@/components/interview/QuestionHeader";
-import { uploadAudio } from "@/lib/api-utils";
 
 type InterviewCardProps = {
   questions: QuizQuestion[];
@@ -17,50 +15,7 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const currentQuestion = questions[currentQuestionIndex];
 
-  // Hooks
-  const { addAnswer, interviewId } = useAnswers();
-  const { startRecording, stopRecording, chunksRef } = useAudioRecorder();
-
-  // State
-  const [questionState, setQuestionState] = useState<QuestionState>("ready");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isUploadError, setIsUploadError] = useState(false);
-  const submitButtonText = isUploadError
-    ? "Answer upload failed: Retry"
-    : "Submit Answer";
-
-  const handleReady = async () => {
-    await startRecording();
-    setQuestionState("recording");
-  };
-
-  const handleSubmit = useCallback(async () => {
-    setIsLoading(true);
-
-    stopRecording();
-
-    // Upload audio to supabase db
-    try {
-      const audioBlob = new Blob(chunksRef.current, { type: "audio/mp3" });
-      const audioURL = await uploadAudio(
-        audioBlob,
-        currentQuestion.id,
-        interviewId!
-      );
-
-      // Add answer to context
-      addAnswer({
-        questionId: questions[currentQuestionIndex].id,
-        audioUrl: audioURL,
-        transcription: null,
-      });
-    } catch (error) {
-      console.error("Failed to upload audio", error);
-      setIsLoading(false);
-      setIsUploadError(true);
-    }
-
-    // Move to next question or summary page
+  const handleNextQuestion = useCallback(() => {
     if (currentQuestionIndex < questions.length - 1) {
       // console.log("Moving to next question");
       setCurrentQuestionIndex((prev) => prev + 1);
@@ -71,16 +26,26 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
       // Causes hard refresh on the page
       window.location.href = "/summary";
     }
-    setIsLoading(false);
-  }, [
-    addAnswer,
-    chunksRef,
-    currentQuestion.id,
-    interviewId,
-    currentQuestionIndex,
-    questions,
-    stopRecording,
-  ]);
+  }, [currentQuestionIndex, questions.length]);
+
+  // Hooks
+  const { startRecording, stopRecording, isUploading, isUploadError } =
+    useAudioRecorder(
+      currentQuestionIndex,
+      currentQuestion.id,
+      handleNextQuestion
+    );
+
+  // State
+  const [questionState, setQuestionState] = useState<QuestionState>("ready");
+  const submitButtonText = isUploadError
+    ? "Answer upload failed: Retry"
+    : "Submit Answer";
+
+  const handleReady = async () => {
+    await startRecording();
+    setQuestionState("recording");
+  };
 
   return (
     <Card className="max-w-xl w-full p-1.5 ">
@@ -90,6 +55,7 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
         questionTimeLimit={currentQuestion.timeLimit}
         questionId={currentQuestion.id}
         isRecording={questionState === "recording"}
+        stopRecording={stopRecording}
       />
       {questionState === "ready" ? (
         <QuestionReady onReady={handleReady} />
@@ -98,12 +64,12 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
           <QuestionDisplay question={currentQuestion} />
 
           <Button
-            onClick={handleSubmit}
+            onClick={stopRecording}
             className="w-full "
             size="lg"
-            disabled={isLoading}
+            disabled={isUploading}
           >
-            {isLoading ? (
+            {isUploading ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="w-4 h-4 border-2 border-[#1c3c1c] border-t-transparent rounded-full animate-spin" />
                 <span>Processing...</span>

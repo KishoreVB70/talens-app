@@ -1,13 +1,12 @@
 import { useAnswers } from "@/contexts/AnswersContext";
 import { uploadAudio } from "@/lib/api-utils";
-import { MutableRefObject, useState } from "react";
+import { MutableRefObject } from "react";
 
 export default function useUploadRecordedAudio(
   chunksRef: MutableRefObject<Blob[]>,
   questionId: number
 ) {
   const { interviewId } = useAnswers();
-  const [audioURL, setAudioURL] = useState<string | null>(null);
 
   const uploadRecordedAudio = async () => {
     console.log("Recording stopped, processing audio...");
@@ -22,11 +21,11 @@ export default function useUploadRecordedAudio(
         interviewId!
       );
       console.log("Audio uploaded successfully:", uploadedUrl);
-      setAudioURL(uploadedUrl);
+      return uploadedUrl;
     } catch (error) {
       throw error;
     }
   };
 
-  return { uploadRecordedAudio, audioURL };
+  return { uploadRecordedAudio };
 }
