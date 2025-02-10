@@ -7,7 +7,7 @@ import { QuestionReady } from "@/components/interview/QuestionReady";
 import { Card } from "@/components/ui/card";
 import { QuestionState, QuizQuestion } from "@/lib/types";
 import QuestionsHeader from "@/components/interview/QuestionHeader";
-import useUploadRecordedAudio from "@/hooks/useUploadRecordedAudio";
+import { uploadAudio } from "@/lib/api-utils";
 
 type InterviewCardProps = {
   questions: QuizQuestion[];
@@ -18,13 +18,8 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
   const currentQuestion = questions[currentQuestionIndex];
 
   // Hooks
-  const { addAnswer } = useAnswers();
+  const { addAnswer, interviewId } = useAnswers();
   const { startRecording, stopRecording, chunksRef } = useAudioRecorder();
-  // Info: Currently questions[index] can't be undefined
-  const { audioURL, uploadRecordedAudio } = useUploadRecordedAudio(
-    chunksRef,
-    questions[currentQuestionIndex]?.id
-  );
 
   // State
   const [questionState, setQuestionState] = useState<QuestionState>("ready");
@@ -41,27 +36,31 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
 
   const handleSubmit = useCallback(async () => {
     setIsLoading(true);
+
     stopRecording();
 
-    // 1) Upload audio to supabase db
+    // Upload audio to supabase db
     try {
-      await uploadRecordedAudio();
+      const audioBlob = new Blob(chunksRef.current, { type: "audio/mp3" });
+      const audioURL = await uploadAudio(
+        audioBlob,
+        currentQuestion.id,
+        interviewId!
+      );
+
+      // Add answer to context
+      addAnswer({
+        questionId: questions[currentQuestionIndex].id,
+        audioUrl: audioURL,
+        transcription: null,
+      });
     } catch (error) {
       console.error("Failed to upload audio", error);
       setIsLoading(false);
       setIsUploadError(true);
     }
 
-    // 2) Add answer to context
-    if (!audioURL) return;
-    // Doesn't return an error
-    addAnswer({
-      questionId: questions[currentQuestionIndex].id,
-      audioUrl: audioURL,
-      transcription: null,
-    });
-
-    // 3) Move to next question or summary page
+    // Move to next question or summary page
     if (currentQuestionIndex < questions.length - 1) {
       // console.log("Moving to next question");
       setCurrentQuestionIndex((prev) => prev + 1);
@@ -75,11 +74,12 @@ export default function InterviewCard({ questions }: InterviewCardProps) {
     setIsLoading(false);
   }, [
     addAnswer,
-    audioURL,
+    chunksRef,
+    currentQuestion.id,
+    interviewId,
     currentQuestionIndex,
     questions,
     stopRecording,
-    uploadRecordedAudio,
   ]);
 
   return (
