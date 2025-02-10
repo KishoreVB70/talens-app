@@ -31,14 +31,14 @@
       "instructions": [
         "What do you think is the most likely reason for the increase in jellyfish sightings? Think out loud and explain your reasoning"
       ],
-      "timeLimit": 300
+      "timeLimit": 240
     },
     {
       "id": 4,
       "title": "Scenario",
       "questionText": "A small island community of 500 people is facing a crisis. Their only school, which serves all age groups, has been severely damaged by a storm. With limited resources and no immediate help from the mainland, the islanders must find a way to continue education for their children. The island has abundant natural resources but lacks modern technology. The community values education highly but also needs to maintain essential services like fishing and farming. How can they ensure continuous learning for all students while dealing with their limited resources and isolation?",
       "instructions": ["How would you solve this problem? Think out loud."],
-      "timeLimit": 300
+      "timeLimit": 240
     },
     {
       "id": 5,
@@ -47,7 +47,7 @@
       "instructions": [
         "Estimate the time for each task and create a prioritized schedule."
       ],
-      "timeLimit": 300
+      "timeLimit": 240
     },
     {
       "id": 6,
